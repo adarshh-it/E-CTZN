@@ -1,95 +1,106 @@
 :root {
-    --primary:#0f172a;
-    --secondary:#1e293b;
-    --accent:#66b3cd;
-    --danger:#ef4444;
-    --info:#3b82f6;
-    --success:#22c55e;
-    --border:#cbd5e1;
+    --primary: #0f172a;
+    --secondary: #1e293b;
+    --accent: #66b3cd;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+    --success: #22c55e;
+    --text: #1e293b;
+    --card-bg: #ffffff;
+    --border: #cbd5e1;
 }
 
-body{
-    margin:0;
-    font-family:'Courier New', monospace;
-    background:url('pictures/bg.jpg') center/cover fixed no-repeat;
-    display:flex;
-    min-height:100vh;
+body {
+    margin: 0;
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #f1f5f9;
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
 }
 
-.hidden{display:none!important;}
-
-.login-card{
-    background:#fff;
-    padding:40px;
-    border-radius:12px;
-    width:380px;
-    text-align:center;
+/* Auth Overlay */
+#loginOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
 }
 
-#loginOverlay{
-    position:fixed;
-    inset:0;
-    background:var(--primary);
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:9999;
+.login-card {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    width: 380px;
+    text-align: center;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
 }
 
-.sidebar{
-    width:280px;
-    background:var(--primary);
-    color:#fff;
-    position:fixed;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
+.subtitle { font-size: 0.7rem; color: gray; margin-bottom: 20px; }
+
+/* Sidebar */
+.sidebar {
+    height: 100vh;
+    width: 280px;
+    position: fixed;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    flex-direction: column;
 }
 
-.sidebar a{
-    padding:15px 30px;
-    color:#94a3b8;
-    cursor:pointer;
-    text-decoration:none;
+.sidebar-header {
+    padding: 30px;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--accent);
+    border-bottom: 1px solid #334155;
 }
 
-.sidebar a:hover{
-    background:var(--secondary);
-    color:#fff;
+.sidebar-header small { display: block; font-size: 0.6rem; color: #94a3b8; }
+
+.sidebar a {
+    padding: 15px 30px;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: 0.3s;
+    border-left: 4px solid transparent;
 }
 
-.main{
-    margin-left:280px;
-    padding:40px;
-    width:calc(100% - 280px);
+.sidebar a:hover {
+    background: var(--secondary);
+    color: white;
+    border-left-color: var(--accent);
 }
 
-.card{
-    background:#fff;
-    padding:25px;
-    border-radius:12px;
-    border:1px solid var(--border);
+/* Layout */
+.main { margin-left: 280px; width: calc(100% - 280px); padding: 40px; }
+.card {
+    background: var(--card-bg);
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:15px;
-}
+.form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+.full-width { grid-column: span 2; }
 
-.full-width{grid-column:span 2;}
+/* Buttons */
+button { border: none; padding: 12px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; text-transform: uppercase; transition: 0.2s; }
+.btn-primary { background: var(--accent); color: white; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-secondary { background: var(--secondary); color: white; }
 
-.alert-banner{
-    background:var(--danger);
-    color:#fff;
-    padding:15px;
-    border-radius:8px;
-    font-weight:bold;
-}
+/* Statuses */
+.status-on { color: var(--success); font-weight: bold; }
+.status-off { color: var(--danger); font-weight: bold; }
+.heatmap-box { background: #1e293b; color: white; padding: 20px; border-radius: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
+.heat-tag { background: #334155; padding: 5px 12px; border-radius: 4px; font-size: 0.8rem; border-left: 3px solid var(--accent); }
 
-.heatmap-box{
-    background:#1e293b;
-    padding:15px;
-    border-radius:8px;
-    color:#fff;
-}
+.hidden { display: none !important; }
