@@ -1,137 +1,156 @@
+// DATABASE LAYER
+const DB = {
+    dbName: "ECTZN_DB",
+    init() {
+        return new Promise((resolve) => {
+            const request = indexedDB.open(this.dbName, 1);
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                db.createObjectStore("volunteers", { keyPath: "govID" });
+                db.createObjectStore("incidents", { keyPath: "id" });
+            };
+            request.onsuccess = (e) => {
+                this.instance = e.target.result;
+                resolve();
+            };
+        });
+    },
+    async save(storeName, data) {
+        const tx = this.instance.transaction(storeName, "readwrite");
+        tx.objectStore(storeName).put(data);
+    },
+    async getAll(storeName) {
+        return new Promise((resolve) => {
+            const tx = this.instance.transaction(storeName, "readonly");
+            const request = tx.objectStore(storeName).getAll();
+            request.onsuccess = () => resolve(request.result);
+        });
+    }
+};
+
+// ENGINE LAYER
 window.Engine = {
     role: "User",
     ADMIN_KEY: "chengalpattu2025",
-    WAQI_API_KEY: "demo", 
     volunteers: [],
     incidents: [],
 
-    // 1. ASYNC INIT: Must wait for DB to open
     async init() {
-        await DB.init(); 
-        
-        // Fetch data from DB tables
+        await DB.init();
         this.volunteers = await DB.getAll('volunteers');
         this.incidents = await DB.getAll('incidents');
         
         const savedRole = localStorage.getItem('userRole');
-        if (savedRole) this.role = savedRole;
+        if (savedRole) {
+            this.role = savedRole;
+            this.updateUIForRole();
+        } else {
+            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+            modal.show();
+        }
 
         this.refreshStats();
-        this.automation.startMonitoring();
-        
-        // Initial view setup
-        this.showSection('home'); 
+        this.showSection('home');
+        this.startClock();
     },
 
-    // 2. ADMIN AUTHENTICATION LOGIC
+    toggleAdminField(val) {
+        document.getElementById('adminKeyContainer').classList.toggle('d-none', val !== 'Admin');
+    },
+
     login() {
-        const key = prompt("Enter District Admin Key:");
-        if (key === this.ADMIN_KEY) {
-            this.role = "Admin";
-            localStorage.setItem('userRole', 'Admin');
-            alert("District Access Granted.");
-            location.reload(); // Refresh to update UI visibility
+        const role = document.getElementById('userRole').value;
+        const key = document.getElementById('adminKey').value;
+
+        if (role === 'Admin') {
+            if (key === this.ADMIN_KEY) {
+                localStorage.setItem('userRole', 'Admin');
+                location.reload();
+            } else {
+                alert("Invalid Key");
+            }
         } else {
-            alert("Access Denied.");
+            localStorage.setItem('userRole', 'User');
+            location.reload();
         }
     },
 
     logout() {
         localStorage.removeItem('userRole');
-        this.role = "User";
         location.reload();
     },
 
-    // --- GEOLOCATION ---
-    getGPS() {
-        return new Promise((resolve) => {
-            if (!navigator.geolocation) resolve("GPS Unsupported");
-            navigator.geolocation.getCurrentPosition(
-                (pos) => resolve(`${pos.coords.latitude.toFixed(4)}, ${pos.coords.longitude.toFixed(4)}`),
-                () => resolve("Location Restricted"),
-                { enableHighAccuracy: true, timeout: 5000 }
-            );
-        });
+    updateUIForRole() {
+        if (this.role === 'Admin') {
+            document.getElementById('logoutBtn')?.classList.remove('d-none');
+            document.getElementById('verificationAdminCard')?.classList.remove('d-none');
+            document.getElementById('adminReviewSection')?.classList.remove('d-none');
+            this.renderAdminLists();
+        }
     },
 
-    // --- UPDATED CORE ACTIONS ---
+    showSection(id) {
+        document.querySelectorAll('.content-section').forEach(s => s.classList.add('d-none'));
+        document.getElementById(id + 'Section').classList.remove('d-none');
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.add('text-white-50'));
+        document.getElementById('link-' + id).classList.remove('text-white-50');
+    },
+
     async registerVolunteer() {
-        const skills = Array.from(document.querySelectorAll('input[name="vskill"]:checked')).map(i => i.value);
-        const geoTag = await this.getGPS();
-
         const newVol = {
-            govID: document.getElementById('volGovID').value || "N/A",
-            name: document.getElementById('volName').value || "Anonymous",
-            tier: document.getElementById('volMainSkill').value,
-            avail: document.getElementById('volAvail').value,
-            skills, 
+            govID: document.getElementById('volGovID').value,
+            name: document.getElementById('volName').value,
             location: document.getElementById('volLocation').value,
-            gps: geoTag,
-            isVerified: false 
+            skills: [document.getElementById('volMainSkill').value],
+            isVerified: false
         };
-
-        // Save to DB Table instead of localStorage
         await DB.save('volunteers', newVol);
-        this.volunteers.push(newVol);
-        
-        alert(`Credentials Logged. Verification Pending for ${newVol.name}`);
-        this.showSection('home');
+        alert("Enrolled. Pending District Audit.");
+        location.reload();
     },
 
     async createIncident() {
-        const reqs = Array.from(document.querySelectorAll('input[name="tskill"]:checked')).map(i => i.value);
-        const taskLoc = document.getElementById('taskLocation').value;
-        const maxNeeded = parseInt(document.getElementById('taskMaxVolunteers').value) || 1;
-
         const newInc = {
-            id: 'OPS-' + Math.random().toString(36).substr(2, 4).toUpperCase(),
+            id: 'OPS-' + Date.now().toString().slice(-4),
             type: document.getElementById('taskType').value,
-            criticality: document.getElementById('taskCriticality').value,
             address: document.getElementById('taskAddress').value,
-            victims: document.getElementById('taskVictims').value,
-            hazmat: document.getElementById('taskHazmat').value,
-            maxNeeded, location: taskLoc, requiredSkills: reqs,
-            status: (this.role === 'Admin') ? 'PENDING' : 'UNAUTHORIZED',
-            responders: []
+            location: document.getElementById('taskLocation').value,
+            status: (this.role === 'Admin') ? 'PENDING' : 'UNAUTHORIZED'
         };
-
         await DB.save('incidents', newInc);
-        this.incidents.push(newInc);
-        this.showSection('dashboard');
+        alert("Signal Transmitted.");
+        location.reload();
     },
 
-    async authorizeReport(index) {
-        const inc = this.incidents[index];
-        // Automatic Matching Logic
-        const matches = this.volunteers.filter(v => 
-            v.isVerified && 
-            v.location === inc.location && 
-            v.skills.some(s => inc.requiredSkills.includes(s))
-        ).slice(0, inc.maxNeeded);
-        
-        inc.status = matches.length > 0 ? 'IN_PROGRESS' : 'PENDING';
-        inc.responders = matches.map(m => m.name);
-        
-        await DB.save('incidents', inc); // Update in DB
-        this.renderReviewQueue();
-        this.refreshStats();
+    refreshStats() {
+        document.getElementById('statVols').innerText = this.volunteers.filter(v => v.isVerified).length;
+        document.getElementById('statIncidents').innerText = this.incidents.filter(i => i.status !== 'UNAUTHORIZED').length;
     },
 
-    async authorizeResponder(i) { 
-        this.volunteers[i].isVerified = true; 
-        await DB.save('volunteers', this.volunteers[i]); // Update in DB
-        this.renderVerificationList(); 
-        this.refreshStats();
+    startClock() {
+        setInterval(() => {
+            document.getElementById('liveTime').innerText = new Date().toLocaleTimeString();
+        }, 1000);
     },
 
-    // --- REFRESH LOGIC ---
-    refreshStats() { 
-        const vCount = document.getElementById('statVols');
-        const iCount = document.getElementById('statIncidents');
-        if(vCount) vCount.innerText = this.volunteers.filter(v => v.isVerified).length;
-        if(iCount) iCount.innerText = this.incidents.filter(i => i.status !== 'RESOLVED' && i.status !== 'UNAUTHORIZED').length;
+    renderAdminLists() {
+        const vList = document.getElementById('pendingVolunteerList');
+        if(vList) {
+            vList.innerHTML = this.volunteers.filter(v => !v.isVerified).map(v => `
+                <div class="col-12 p-2 border rounded bg-light d-flex justify-content-between">
+                    <span>${v.name} (${v.location})</span>
+                    <button class="btn btn-sm btn-success" onclick="Engine.verifyVol('${v.govID}')">Verify</button>
+                </div>
+            `).join('');
+        }
+    },
+
+    async verifyVol(id) {
+        const vol = this.volunteers.find(v => v.govID === id);
+        vol.isVerified = true;
+        await DB.save('volunteers', vol);
+        location.reload();
     }
 };
 
-// Start the engine
 document.addEventListener('DOMContentLoaded', () => Engine.init());
