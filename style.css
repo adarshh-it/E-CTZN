@@ -1,28 +1,37 @@
-:root {
-    --primary: #0f172a; --secondary: #1e293b; --accent: #66b3cd;
-    --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6; 
-    --text: #000000; --card-bg: #ffffff; --border: #cbd5e1;
-    --success: #22c55e;
+/* Custom Overrides for E-CTZN */
+
+/* Sidebar Active State */
+.nav-pills .nav-link.active, 
+.nav-pills .show > .nav-link {
+    background-color: #198754; /* Bootstrap Success Color */
+    color: white !important;
 }
 
-body { 
-    margin: 0; font-family: 'Courier New', Courier, monospace; 
-    background-color: #f1f5f9; color: var(--text); display: flex; min-height: 100vh;
+.nav-link:hover {
+    background-color: #343a40;
+    color: #198754 !important;
 }
 
-.sidebar { height: 100vh; width: 280px; position: fixed; background: var(--primary); color: white; display: flex; flex-direction: column; }
-.sidebar-header { padding: 30px; font-size: 1.2rem; font-weight: 800; color: var(--accent); border-bottom: 1px solid #334155; }
-.sidebar a { padding: 15px 30px; color: #94a3b8; text-decoration: none; border-left: 4px solid transparent; cursor: pointer; }
-.sidebar a:hover { background: var(--secondary); color: white; border-left-color: var(--accent); }
+/* Typography Tweaks */
+.ls-1 {
+    letter-spacing: 1px;
+}
 
-.main { margin-left: 280px; width: calc(100% - 280px); padding: 40px; }
-.card { background: var(--card-bg); padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+.card {
+    transition: transform 0.2s;
+}
 
-.alert-banner { background: var(--danger); color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; animation: pulse 2s infinite; font-weight: bold; }
-@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+/* Subtle hover effect for dashboard cards */
+.emergency-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
 
-.hidden { display: none !important; }
-.status-on { color: var(--success); font-weight: bold; }
-.status-off { color: var(--danger); font-weight: bold; }
-
-.btn-intel { width: 100%; font-size: 0.7rem; margin-top: 5px; background: var(--accent); color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; }
+/* Utility to hide/show sections (Bootstrap uses d-none, but JS toggles this) 
+   We keep this class to ensure compatibility with your existing logic or 
+   we update JS to use d-none. I updated JS below to use d-none, 
+   but keeping this for safety if you revert JS. 
+*/
+.hidden {
+    display: none !important;
+}
