@@ -1,96 +1,165 @@
-/* Custom Overrides for E-CTZN v2.0 */
-
-/* Sidebar Navigation */
-.nav-pills .nav-link.active {
-    background-color: #198754; 
-    color: white !important;
-    border-left: 4px solid #fff;
-    border-radius: 0 5px 5px 0;
+:root {
+    /* Muted & Command-Center Palette */
+    --primary: #618ed5;    /* Deep Slate */
+    --secondary: #82b0ef;  /* Medium Slate */
+    --accent: #94a3b8;     /* Muted Silver Blue */
+    --danger: #bf4c4c;     /* Muted Crimson */
+    --warning: #be7e36;    /* Muted Amber */
+    --success: #35a082;    /* Deep Emerald */
+    --info: #4682a2;       /* Deep Sky */
+    --text: #0f172a;       /* Dark Navy */
+    --card-bg: rgba(255, 255, 255, 0.94);
+    --border: rgba(0, 0, 0, 0.1);
+    --sidebar-width: 260px;
 }
 
-.nav-link {
-    transition: all 0.3s ease;
-    border-left: 4px solid transparent;
+/* Global Reset to prevent width calculation errors */
+* {
+    box-sizing: border-box;
 }
 
-.nav-link:hover {
-    background-color: #343a40;
-    color: #198754 !important;
-    padding-left: 15px;
+/* Update these core sections in your style.css */
+
+body {
+    margin: 0;
+    padding: 0;
+    display: flex; /* Creates a horizontal relationship between Sidebar and Main */
+    min-height: 100vh;
+    font-family: 'Courier New', Courier, monospace;
+    /* ... your background images ... */
 }
 
-/* --- NEW: Sensor Status Animations --- */
-.dot-pulse {
-    height: 8px;
-    width: 8px;
-    background-color: #198754;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 5px;
-    animation: pulse-green 2s infinite;
-}
-
-@keyframes pulse-green {
-    0% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); }
-    70% { box-shadow: 0 0 0 10px rgba(25, 135, 84, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
-}
-
-/* --- NEW: Automated Alert Styles --- */
-.card-automated {
-    background: linear-gradient(45deg, #ffffff, #fff3cd);
-    border-left: 5px solid #ffc107 !important;
-}
-
-.badge-sensor {
-    font-size: 0.7rem;
-    letter-spacing: 0.5px;
-    background: #000;
-    color: #fff;
-    padding: 3px 8px;
-    border-radius: 4px;
-}
-
-/* Card Improvements */
-.card {
-    border-radius: 12px;
-    transition: all 0.2s ease-in-out;
-}
-
-.shadow-sm {
-    box-shadow: 0 .125rem .5rem rgba(0,0,0,.075)!important;
-}
-
-.content-section {
-    animation: fadeIn 0.4s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Typography & Layout */
-.ls-1 { letter-spacing: 1.5px; }
-
-/* Dashboard List Spacing */
-#list-pending, #list-progress, #list-resolved {
-    min-height: 100px;
-}
-
-/* Responsive fixes for small screens */
-@media (max-width: 768px) {
-    .display-3 { font-size: 2.5rem; }
-    .nav-link span { display: none; }
-}
-
-/* GPS Button Styling */
-.btn-outline-danger {
-    border-width: 1px;
-    font-weight: 600;
-}
-
-.btn-outline-danger:hover {
-    background-color: #dc3545;
+.sidebar {
+    width: 280px;
+    flex-shrink: 0; /* Prevents the sidebar from getting squished */
+    height: 100vh;
+    position: sticky; /* Stays in view while scrolling */
+    top: 0;
+    left: 0;
+    background: var(--primary);
     color: white;
+    z-index: 1000;
+    overflow-y: auto; /* Allows the sidebar itself to scroll if it has many links */
+}
+
+.main {
+    flex-grow: 1; /* Takes up all remaining space */
+    min-width: 0;  /* Crucial for preventing content from breaking the flex container */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers cards horizontally */
+    padding: 30px;
+}
+
+/* Update your content-container to allow more room for the stats row */
+.content-container {
+    width: 100%;
+    max-width: 900px; /* Increased to allow stats side-by-side */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Creates consistent vertical space between cards */
+    padding: 10px;
+}
+
+/* Ensure the API card stays compact but full width of container */
+.api-card {
+    width: 100%;
+    max-height: 180px; /* Slightly reduced to keep it slim */
+    overflow-y: hidden; /* Hide main overflow, scroll only the list */
+    padding: 15px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-top: 4px solid var(--info);
+}
+
+/* Add this to handle the "Quick Stats" row correctly */
+.row.g-3 {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px; /* Offset bootstrap padding */
+}
+
+.row.g-3 > div {
+    flex: 1;
+    min-width: 280px; /* Prevents them from getting too skinny/overlapping */
+    padding: 0 10px;
+}
+
+/* Force the stat cards to be the same height */
+.card.p-4 {
+    height: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+}
+/* --- Aesthetic Earthquake Monitor Card --- */
+
+.api-card .section-title {
+    text-align: left;
+    letter-spacing: 2px;
+    font-size: 0.8rem;
+    color: var(--primary);
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#earthquake-list {
+    overflow-y: auto;
+    padding-right: 2px;
+    flex-grow: 1;
+}
+
+#earthquake-list::-webkit-scrollbar {
+    width: 4px;
+}
+#earthquake-list::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+}
+
+/* Individual Quake Item Styling */
+.quake-item {
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    background: rgba(255, 252, 252, 0.5);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--info); /* Signal indicator */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.quake-item:hover {
+    background: #f8fafc;
+    border-left-width: 8px;
+}
+
+/* Magnitude Badge: Square & Formal */
+.quake-mag {
+    background: var(--primary); /* Muted slate instead of bright blue */
+    color: white;
+    padding: 4px 4px;
+    font-weight: 900;
+    font-size: 0.9rem;
+    min-width: 60px;
+    text-align: center;
+}
+
+.quake-date {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--secondary);
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+/* API Footer Info */
+.api-status {
+    font-size: 0.65rem;
+    color: var(--accent);
+    margin-top: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
